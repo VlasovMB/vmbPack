@@ -88,7 +88,7 @@ public class ArchiveEntryWriter implements AutoCloseable {
     }
 
     private void addEntryToArchive(Path pathEntry, Path baseDirectory, BasicFileAttributes entryAttributes) throws IOException {
-        UtilConsole.CONSOLE_IO.outputLine("Архивация: " + outputFile + "\t>\t" + pathEntry);
+        UtilConsole.CONSOLE_IO.outputLine("Архивация: " + pathEntry + " > " + outputFile);
 
         outputStream.writeUTF(String.valueOf(baseDirectory.resolve(baseDirectory.relativize(pathEntry))));
         outputStream.writeLong(entryAttributes.creationTime().toMillis());

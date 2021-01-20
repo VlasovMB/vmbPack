@@ -1,6 +1,8 @@
 package testquickresto.archiver;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import testquickresto.exceptions.WrongArchiveFileException;
 import testquickresto.menu.UtilConsole;
 
@@ -17,6 +19,8 @@ import java.nio.file.attribute.FileTime;
  * The type Archive entry reader.
  */
 public class ArchiveEntryReader implements AutoCloseable{
+
+    private static final Logger logger = LogManager.getLogger(ArchiveEntryReader.class);
 
     private final DataInputStream inputStream;
     private ArchiveEntry currentEntry;
@@ -46,7 +50,7 @@ public class ArchiveEntryReader implements AutoCloseable{
         if (!ArchiveUtil.checkIsArchive(inputStream.readInt())) throw new WrongArchiveFileException();
 
         for (ArchiveEntry entry = nextEntry(); entry != null; entry = nextEntry()) {
-            Path targetPath = Paths.get(directory.toString(), entry.toString());
+            Path targetPath = Paths.get(directory.toString(), entry.getPathWithoutInvalidChars());
             extractFile(targetPath, entry);
         }
     }
@@ -54,7 +58,7 @@ public class ArchiveEntryReader implements AutoCloseable{
     private void extractFile(Path targetPath, ArchiveEntry entry) throws IOException {
         ensureParentDirExists(targetPath);
 
-        UtilConsole.CONSOLE_IO.outputLine("Извлечение: "+ unpackDirectory + "\t|\t" + entry);
+        UtilConsole.CONSOLE_IO.outputLine("Извлечение: "+ unpackDirectory + " | " + entry.getPathWithoutInvalidChars());
 
         if (entry.isDirectory()) {
             Files.createDirectories(targetPath);
@@ -93,7 +97,7 @@ public class ArchiveEntryReader implements AutoCloseable{
     private ArchiveEntry readEntry() throws IOException {
         try {
             ArchiveEntry entry = new ArchiveEntry();
-            entry.setName(inputStream.readUTF());
+            entry.setStrPath(inputStream.readUTF());
             entry.setCreationTime(inputStream.readLong());
             entry.setLastModifiedTime(inputStream.readLong());
             entry.setDirectory(inputStream.readBoolean());
@@ -106,11 +110,17 @@ public class ArchiveEntryReader implements AutoCloseable{
             }
 
             return entry;
-        } catch (EOFException e) {
+        } catch (EOFException ignored) {
             return null;
         }
+
     }
 
+    /**
+     * @param archiveInputStream
+     * @return Compressed input stream
+     * @throws IOException
+     */
     private InputStream getCompressorInputStream(ArchiveInputStream archiveInputStream) throws IOException {
         return new BZip2CompressorInputStream(archiveInputStream);
     }
@@ -118,5 +128,6 @@ public class ArchiveEntryReader implements AutoCloseable{
     @Override
     public void close() throws IOException {
         inputStream.close();
+        logger.info("Распаковка завершена: " + unpackDirectory);
     }
 }

@@ -7,7 +7,7 @@ import java.io.InputStream;
  * The type Archive entry.
  */
 public class ArchiveEntry {
-    private String name;
+    private String strPath;
     private long creationTime;
     private long lastModifiedTime;
     private boolean isDirectory;
@@ -18,17 +18,17 @@ public class ArchiveEntry {
      *
      * @return the name
      */
-    public String getName() {
-        return name;
+    public String getStrPath() {
+        return strPath;
     }
 
     /**
      * Sets name.
      *
-     * @param name the name
+     * @param strPath the name
      */
-    public void setName(String name) {
-        this.name = name;
+    public void setStrPath(String strPath) {
+        this.strPath = strPath;
     }
 
     /**
@@ -105,6 +105,15 @@ public class ArchiveEntry {
 
     @Override
     public String toString() {
-        return name;
+        return strPath;
+    }
+
+    /**
+     * Get path without invalid chars string.
+     *
+     * @return the string
+     */
+    public String getPathWithoutInvalidChars() {
+        return strPath.replace(":", "");
     }
 }

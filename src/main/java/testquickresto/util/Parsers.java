@@ -1,5 +1,9 @@
 package testquickresto.util;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -11,6 +15,7 @@ import java.util.stream.Collectors;
  * The type Parsers.
  */
 public class Parsers {
+    private static final Logger logger = LogManager.getLogger(Parsers.class);
     private Parsers() {
     }
 
@@ -24,7 +29,16 @@ public class Parsers {
         if (prompt==null) return Collections.emptySet();
         return Arrays
                 .stream(prompt.split("\\s+"))
-                .map(rawPath -> Paths.get(rawPath.trim()).normalize())
+                .distinct()
+                .map(rawPath ->{
+                    Path tempPath = Paths.get("");
+                    try {
+                        tempPath = Paths.get(rawPath.trim()).normalize();
+                    }catch (InvalidPathException e){
+                        logger.error("Некорректная ссылка: " + e.getMessage());
+                    }
+                    return tempPath;
+                })
                 .filter(path -> !path.toString().isEmpty())
                 .collect(Collectors.toSet());
     }

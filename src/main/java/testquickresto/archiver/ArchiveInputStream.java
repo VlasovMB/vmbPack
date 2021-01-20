@@ -105,6 +105,10 @@ public class ArchiveInputStream extends FilterInputStream {
         return bytesToRead;
     }
 
+    /**
+     * @return Chunk size
+     * @throws IOException
+     */
     private int readBufferFromUnderlyingStream() throws IOException {
         if (streamDataFinished) {
             return END_OF_FILE;
